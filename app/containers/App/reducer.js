@@ -11,12 +11,13 @@
  */
 
 import { fromJS } from 'immutable';
+import { handleActions } from 'redux-actions';
 
 import {
-  LOAD_REPOS_SUCCESS,
-  LOAD_REPOS,
-  LOAD_REPOS_ERROR,
-} from './constants';
+  loadRepos,
+  reposLoaded,
+  repoLoadingError,
+} from './actions';
 
 // The initial state of the App
 const initialState = fromJS({
@@ -28,25 +29,21 @@ const initialState = fromJS({
   },
 });
 
-function appReducer(state = initialState, action) {
-  switch (action.type) {
-    case LOAD_REPOS:
-      return state
-        .set('loading', true)
-        .set('error', false)
-        .setIn(['userData', 'repositories'], false);
-    case LOAD_REPOS_SUCCESS:
-      return state
-        .setIn(['userData', 'repositories'], action.repos)
-        .set('loading', false)
-        .set('currentUser', action.username);
-    case LOAD_REPOS_ERROR:
-      return state
-        .set('error', action.error)
-        .set('loading', false);
-    default:
-      return state;
-  }
-}
+const appReducer = handleActions({
+  [loadRepos]: (state) =>
+    state
+      .set('loading', true)
+      .set('error', false)
+      .setIn(['userData', 'repositories'], false),
+  [reposLoaded]: (state, { payload }) =>
+    state
+      .setIn(['userData', 'repositories'], payload.repos)
+      .set('loading', false)
+      .set('currentUser', payload.username),
+  [repoLoadingError]: (state, { payload }) =>
+    state
+      .set('error', payload.error)
+      .set('loading', false),
+}, initialState);
 
 export default appReducer;
